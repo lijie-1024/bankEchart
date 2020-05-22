@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8" />
+    <title>天津银行贷款监控平台</title>
+    <!--设置是否为缩放模式 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" type="text/css"
+      href="https://apps.bdimg.com/libs/bootstrap/3.3.4/css/bootstrap.css" />
+    <link rel="stylesheet"
+      href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+    <link rel="stylesheet" type="text/css" href="css/visual.css" />
+  </head>
+
+  <body class="ksh">
+    <div id="load">
+      <div class="load_img">
+        <!-- 加载动画 -->
+        <img class="jzxz1" src="images/jzxz1.png" />
+        <img class="jzxz2" src="images/jzxz2.png" />
+      </div>
+    </div>
+    <!-- 主体 -->
+    <div class="head_top">
+      <span>银行贷款监控平台</span>
+    </div>
+    <div class="visual" id="indexApp">
+      <div class="visual_left">
+        <div class="visual_box" style="height: 100%;">
+          <div class="visual_title">
+            <span>贷款统计</span>
+            <img src="images/ksh33.png" />
+          </div>
+          <div class="visual_chart sfzcll">
+            <!-- <a>客户号</a> -->
+            <div style="display: flex;">
+              <a>部门</a>
+              <a>姓名</a>
+              <a>发放地</a>
+              <a>目的地</a>
+              <a>金额/万</a>
+              <a>申请时间</a>
+              <a>状态</a>
+            </div>
+            <div class="visual_chart" style="overflow: hidden;">
+              <vue-seamless-scroll @click.native="clickInfo" :data="tableData"
+                :class-option="option">
+                <div class="sfzcll_box" v-for="(item ,i) in tableData">
+                  <img class="sfzcll_bkJk" src="images/ksh34.png" />
+                  <img class="sfzcll_bkJk" src="images/ksh34.png" />
+                  <img class="sfzcll_bkJk" src="images/ksh34.png" />
+                  <img class="sfzcll_bkJk" src="images/ksh34.png" />
+                  <div class="sfzcll_smallBk">
+                    <div class="ygh"><span :title="item.institutionName">{{item.institutionName}}</span></div>
+                  </div>
+                  <div class="sfzcll_smallBk">
+                    <div class="ygl"><span :title="item.customerName| name">{{item.customerName
+                        | name}}</span></div>
+                  </div>
+                  <div class="sfzcll_smallBk">
+                    <div class="ygh"><span :title="item.grantPlace">{{item.grantPlace}}</span></div>
+                  </div>
+                  <div class="sfzcll_smallBk">
+                    <div class="ygl"><span :title="item.destPlace">{{item.destPlace}}</span></div>
+                  </div>
+                  <div class="sfzcll_smallBk">
+                    <div class="ygh"><span :title="item.loanAmount">{{item.loanAmount}}</span></div>
+                  </div>
+                  <div class="sfzcll_smallBk" style="width: 25%;">
+                    <div class="ygl right"><span :title="item.loanStartTime">{{item.loanStartTime}}</span></div>
+                  </div>
+                  <div class="sfzcll_smallBk" style="cursor: pointer;">
+                    <div :class="item.loanAmount>50?'ygh':'error'"><span
+                        :id="item.id">{{item.loanAmount>50?'通过':'拒绝'}}</span></div>
+                  </div>
+                  <div class="clear"></div>
+                </div>
+                <hr />
+              </vue-seamless-scroll>
+
+              <!-- 弹框 -->
+              <el-dialog title="授信详情" :visible.sync="dialogVisible" >
+                <el-form ref="clickRow" :model="clickRow" label-width="120px">
+                  <el-row >
+                    <el-col :span="12">
+                      <el-form-item label="客户姓名">
+                        <el-input v-model="clickRow.customerName" readonly></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                      <el-form-item label="客户号">
+                        <el-input v-model="clickRow.customerSn" readonly></el-input>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                  <el-row >
+                    <el-col :span="12">
+                      <el-form-item label="手机号">
+                        <el-input value="176****9825" readonly></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                      <el-form-item label="证件号码">
+                        <el-input value="110***********1732" readonly></el-input>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+
+                  <el-row >
+                    <el-col :span="12">
+                      <el-form-item label="部门">
+                        <el-input v-model="clickRow.institutionName" readonly></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                      <el-form-item label="产品名">
+                        <el-input value="金融贷2.0" readonly></el-input>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+
+                  <el-row >
+                    <el-col :span="12">
+                      <el-form-item label="贷款类型">
+                        <el-input value="单笔单批" readonly></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                      <el-form-item label="贷款金额/万元">
+                        <el-input v-model="clickRow.loanAmount" readonly></el-input>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+
+                  <el-row >
+                    <el-col :span="12">
+                      <el-form-item label="申请时间">
+                        <el-input v-model="clickRow.loanStartTime" readonly></el-input>
+                      </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                      <el-form-item label="是否通过">
+                        <el-input v-model="clickRow.state" readonly></el-input>
+                      </el-form-item>
+                    </el-col>
+                  </el-row>
+                  <el-form-item label="拒绝原因" v-show="clickRow.state == '拒绝'">
+                    <el-input value="超过系统响应时间" readonly></el-input>
+                  </el-form-item>
+                </el-form>
+
+                <!-- <span slot="footer" class="dialog-footer">
+                  <el-button @click="dialogVisible= false">取 消</el-button>
+                  <el-button type="primary" @click="dialogVisible= false">确 定</el-button>
+                </span> -->
+              </el-dialog>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="visual_con">
+        <div class="visual_conTop">
+          <div class="visual_conTop_box visual_conTop1">
+            <div>
+              <h3>当前贷款数(笔)</h3>
+              <div style="display: flex;">
+                <p id="totalLoanSize" style="flex: 1;"></p>
+                <div class="conTop_smil">
+                  <a class="sz">日环比:<span>{{loanRatioInfo.LoanNumdayonday||0}}%</span><i
+                      class="fa fa-long-arrow-up"></i></a>
+                  <a class="xd">周环比:<span>{{loanRatioInfo.loanNumweekonweek||0}}%</span><i
+                      class="fa fa-long-arrow-down"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="visual_conTop_box visual_conTop1">
+            <div>
+              <h3>当日贷款数(万元)</h3>
+              <div style="display: flex;">
+                <p id="loanAmountDaySum"></p>
+                <div class="conTop_smil">
+                  <a class="sz">日环比:<span>{{loanRatioInfo.LoanAmountdayonday||0}}%</span><i
+                      class="fa fa-long-arrow-up"></i></a>
+                  <a class="xd">周环比:<span>{{loanRatioInfo.LoanAmountweekonweek||0}}%</span><i
+                      class="fa fa-long-arrow-down"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="visual_conTop_box visual_conTop2">
+            <div>
+              <h3>当月贷款数(万元)</h3>
+              <p id="loanAmountMonthSum" style="width: 100%;text-align:
+                center;"></p>
+              <!-- <div class="conTop_smil">
+                <a class="null">null</a>
+                <a class="xd">月环比:<span>{{loanRatioInfo.loanAmountmonthonmonth}}</span><i class="fa fa-long-arrow-down"></i></a>
+              </div> -->
+            </div>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <div class="visual_conBot">
+          <img class="visual_conBot_l" src="images/ksh42.png" />
+          <img class="visual_conBot_2" src="images/ksh43.png" />
+          <img class="visual_conBot_3" src="images/ksh44.png" />
+          <img class="visual_conBot_4" src="images/ksh45.png" />
+          <div class="visual_chart_text">
+            <h1>贷款实时监控</h1>
+          </div>
+          <div class="visual_chart" id="main8"></div>
+        </div>
+      </div>
+      <div class="visual_right">
+        <div class="visual_box" style="height: 98%;">
+          <div class="visual_title">
+            <span>贷款排行</span>
+            <img src="images/ksh33.png" />
+            <a href="update.html" class="updateBtn" target="_blank"> 更多操作 ></a>
+          </div>
+          <div class="visual_chart" id="main10"></div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+    .updateBtn {
+      position: absolute;
+      right: 0;
+      top: -3px;
+      color: #fff;
+    }
+  </style>
+    <div class="clear"></div>
+
+    <!-- 解决兼容性es6 -->
+    <script src="https://cdn.bootcss.com/babel-polyfill/7.8.7/polyfill.min.js"></script>
+    <script src="js/browser.min.js"></script>
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="js/jquery.min.js"></script>
+    <!--echarts JS-->
+    <script src="js/echarts.min.js"></script>
+    <!-- vue -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <!-- 轮播swiper文件 -->
+    <script src="js/countUp.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/vue-seamless-scroll@1.1.17/dist/vue-seamless-scroll.min.js"></script>
+    <!--界面样式-->
+    <script src="js/visual.js"></script>
+    <script src="js/china.js"></script>
+    <script src="js/chartMap.js"></script>
+
+    <script type="text/javascript">
+    // import { CountUp } from '.js/countUp.js'
+    $(function () {
+      $('#load').fadeOut(1000)
+      setTimeout(function () {
+        $('#load').remove()
+      }, 1100)
+      var sfzcllH = $('.sfzcll_box').height()
+      var sfzcllHtwo = sfzcllH - 2
+      $('.sfzcll_box').css('line-height', sfzcllH + 'px')
+      $('.sfzcll_smallBk>div').css('line-height', sfzcllHtwo + 'px')
+    })
+  </script>
+    <script type="text/babel">
+    let beastUrl = 'http://47.105.205.65:8081'
+      let beastIP = '47.105.205.65:8081'
+      function getCookie(cname) {
+        var name = cname + '='
+        var ca = document.cookie.split(';')
+        for (var i = 0; i < ca.length; i++) {
+          var c = ca[i].trim()
+          if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length)
+          }
+        }
+        return ''
+      }
+
+      // 格式化
+      Vue.filter('name',function(val){
+        if(val.length < 2) return val
+        return val = val.replace(val.substr(1),'*')
+      })
+      function chageName(val){
+        if(val.length < 2) return val
+              return val = val.replace(val.substr(1),'*')
+      }
+      Vue.filter('phone',function(val){
+        if(val.length < 4) return val
+        return val = val.replace(val.substr(3,7),'*')
+      })
+
+      new Vue({
+        el: '#indexApp',
+        data: {
+          dialogVisible: false,
+          clickRow:{},
+          message: 'Hello World!',
+          tableData: [],
+          historyInfo: [],
+          loanRatioInfo: {
+            totalLoanSize: 0,
+            loanAmountDaySum: 0,
+            loanAmountMonthSum: 0
+          },
+
+          option: {
+            step: 1,
+            limitMoveNum: 9,
+            openTouch: false,
+            waitTime: 1,
+            direction: 1,
+            singleHeight: 30
+          }
+        },
+        created() {
+          this.initSocket()
+        },
+        mounted() {
+          var _this = this
+          this.getLoanAmountInfo()
+          this.getMap()
+          var timer = setInterval(() => {
+            setTimeout(this.getMap, 0)
+          }, 8000)
+          this.$once('hook:boforeDestory', () => {
+            clearInterval(timer)
+            _this.webSocket.close()
+          })
+        },
+        destroyed() {
+          // 页面销毁关闭连接
+          this.webSocket.close()
+          sessionStorage.clear()
+        },
+        methods: {
+          clickInfo(e){
+            if (e.target.id !== '') {    
+            this.clickRow=this.tableData.find(i=>i.id == e.target.id);
+            this.clickRow.customerName = chageName(this.clickRow.customerName)
+            this.clickRow.state = this.clickRow.loanAmount>50?'通过':'拒绝'
+            this.dialogVisible = true
+            }
+          },
+          initSocket() {
+            // 有参数的情况下：
+            var uuid = getCookie('uuid')
+            let url = `ws://${beastIP}/loanLatestInfo/${uuid}/`
+            this.webSocket = new WebSocket(url)
+            this.webSocket.onopen = this.webSocketOnOpen
+            this.webSocket.onclose = this.webSocketOnClose
+            this.webSocket.onmessage = this.webSocketOnMessage
+            this.webSocket.onerror = this.webSocketOnError
+          },
+          // 建立连接成功后的状态
+          webSocketOnOpen() {
+            console.log('websocket连接成功')
+          },
+          // 获取到后台消息的事件，操作数据的代码在onmessage中书写
+          webSocketOnMessage(res) {
+            var _this = this
+            // res就是后台实时传过来的数据
+            // console.log(JSON.parse(res.data))
+            let historyInfo = JSON.parse(sessionStorage.getItem('historyInfo'))
+            let newInfo = JSON.parse(res.data)
+            _this.tableData = newInfo.latestLoansInfo
+            let option = { decimalPlaces: 1, duration: 4 }
+            // 数字框
+            new CountUp('totalLoanSize', newInfo.loanRatioInfo.totalLoanSize, { duration: 4, startVal: _this.loanRatioInfo.totalLoanSize }).start()
+            new CountUp(
+              'loanAmountDaySum',
+              newInfo.loanRatioInfo.loanAmountDaySum,
+              Object.assign(option, { startVal: _this.loanRatioInfo.loanAmountDaySum })
+            ).start()
+            option.decimalPlaces = 2
+            new CountUp(
+              'loanAmountMonthSum',
+              newInfo.loanRatioInfo.loanAmountMonthSum,
+              Object.assign(option, { startVal: _this.loanRatioInfo.loanAmountMonthSum })
+            ).start()
+            _this.loanRatioInfo = newInfo.loanRatioInfo
+
+            _this.loanRatioInfo.LoanAmountdayonday = _this.loanRatioInfo.LoanAmountdayonday.substring(0, _this.loanRatioInfo.LoanAmountdayonday.length - 4)
+            _this.loanRatioInfo.LoanAmountweekonweek = _this.loanRatioInfo.LoanAmountweekonweek.substring(0, _this.loanRatioInfo.LoanAmountweekonweek.length - 4)
+            _this.loanRatioInfo.LoanNumdayonday = _this.loanRatioInfo.LoanNumdayonday.substring(0, _this.loanRatioInfo.LoanNumdayonday.length - 4)
+            _this.loanRatioInfo.loanNumweekonweek = _this.loanRatioInfo.loanNumweekonweek.substring(0, _this.loanRatioInfo.loanNumweekonweek.length - 4)
+            // 新值和旧值对比找出查额
+            historyInfo.loanAmountData.forEach(element => {
+              newInfo.loanAmountData.forEach(e => {
+                // 总数的处理
+                newInfo.loanAmountData[0]['newCount'] = newInfo.loanAmountData[0].loanAmountSum - historyInfo.loanAmountData[0].loanAmountSum
+                newInfo.loanAmountData[0]['oldLoanAmount'] = historyInfo.loanAmountData[0].loanAmountSum
+                if (newInfo.loanAmountData[0]['newCount'] < 0) {
+                  newInfo.loanAmountData[0]['newCount'] = 0
+                  newInfo.loanAmountData[0]['oldLoanAmount'] = newInfo.loanAmountData[0].loanAmountSum
+                }
+                // 其他项的处理
+                if (element.institutionName !== e.institutionName) return false
+                e['newCount'] = e.loanAmount !== element.loanAmount ? e.loanAmount - element.loanAmount : 0
+                e['oldLoanAmount'] = element.loanAmount
+                // console.log(e,1111);
+              })
+            })
+            newInfo.loanAmountData.forEach(e => {
+              if (!e.hasOwnProperty('newCount')) {
+                e['newCount'] = parseInt(e.loanAmount)
+              }
+              if (e.newCount < 0) {
+                e.newCount = 0
+                e.oldLoanAmount = e.loanAmount
+              }
+            })
+            _this.chartInfo(newInfo.loanAmountData, 'new')
+            //给后台发送数据
+            // this.webSocket.send('发送数据')
+          },
+          // 关闭连接
+          webSocketOnClose() {
+            this.webSocket.close()
+            console.log('websocket连接已关闭')
+          },
+          //连接失败的事件
+          webSocketOnError(res) {
+            console.log('websocket连接失败')
+            // 打印失败的数据
+            console.log(res)
+          },
+          // 地图
+          getMap() {
+            let myChart8 = echarts.init(document.getElementById('main8'))
+            axios.get(beastUrl + '/tjbank/loan/loanMapInfo').then(function(res) {
+              if (res.status !== 200) return this.$message.error('请求失败，请联系管理员')
+              let latestLoanData = res.data.latestLoanData
+              let loanData = res.data.loanData
+              let mapData = [],
+                citys = [],
+                mapLoanData = []
+              // 历史的
+              loanData.forEach(element => {
+                let obj = {
+                  fromName: element.grantPlace,
+                  toName: element.destPlace,
+                  coords: [
+                    [element.grantPlaceCoordinateX, element.grantPlaceCoordinateY],
+                    [element.destPlaceCoordinateX, element.destPlaceCoordinateY]
+                  ],
+                  label: {
+                    show: true,
+                    formatter: element.destPlaceLoanAmount.substring(0, element.destPlaceLoanAmount.length - 3),
+                    color: '#fff'
+                  }
+                }
+                mapData.push(obj)
+              })
+              // 最新的
+              latestLoanData.forEach(element => {
+                let obj = {
+                  fromName: element.grantPlace,
+                  toName: element.destPlace,
+                  coords: [
+                    [element.grantPlaceCoordinateX, element.grantPlaceCoordinateY],
+                    [element.destPlaceCoordinateX, element.destPlaceCoordinateY]
+                  ]
+                }
+                mapLoanData.push(obj)
+              })
+              // 最新的
+              option8.series[1].data = mapLoanData
+              // 历史的
+              option8.series[2].data = mapData
+              myChart8.setOption(option8)
+            })
+          },
+          //   渲染页面
+          chartInfo(array, val, old) {
+            var myChart10 = echarts.init(document.getElementById('main10'))
+            let xAxisData = [],
+              data1 = [],
+              data2 = [],
+              data3 = []
+            // console.log(array)
+            array.forEach(element => {
+              xAxisData.push(element.institutionName || element.total)
+              data3.push(element.loanAmount || element.loanAmountSum)
+              if (val == 'new') {
+                data2.push(element.newCount.toString())
+                data1.push(element.oldLoanAmount || 0)
+              } else {
+                data1.push(element.loanAmount || element.loanAmountSum)
+              }
+            })
+            option10.series[0].data = data1
+            option10.series[1].data = data2
+            option10.series[2].data = data3
+            option10.yAxis.data = xAxisData
+            myChart10.setOption(option10)
+          },
+
+          // 右侧查看金额
+          getLoanAmountInfo() {
+            var _this = this
+            var myChart10 = echarts.init(document.getElementById('main10'))
+            axios.get(beastUrl + '/tjbank/loan/latestLoanInfo', {}).then(function(res) {
+              if (res.status !== 200) return this.$message.error('请求失败，请联系管理员')
+              _this.tableData = res.data.latestLoansInfo
+              _this.loanRatioInfo = res.data.loanRatioInfo
+              _this.loanRatioInfo.LoanAmountdayonday = _this.loanRatioInfo.LoanAmountdayonday.substring(0, _this.loanRatioInfo.LoanAmountdayonday.length - 4)
+              _this.loanRatioInfo.LoanAmountweekonweek = _this.loanRatioInfo.LoanAmountweekonweek.substring(0, _this.loanRatioInfo.LoanAmountweekonweek.length - 4)
+              _this.loanRatioInfo.LoanNumdayonday = _this.loanRatioInfo.LoanNumdayonday.substring(0, _this.loanRatioInfo.LoanNumdayonday.length - 4)
+              _this.loanRatioInfo.loanNumweekonweek = _this.loanRatioInfo.loanNumweekonweek.substring(0, _this.loanRatioInfo.loanNumweekonweek.length - 4)
+              new CountUp('totalLoanSize', _this.loanRatioInfo.totalLoanSize, { duration: 4 }).start()
+              new CountUp('loanAmountDaySum', _this.loanRatioInfo.loanAmountDaySum, { decimalPlaces: 1, duration: 4 }).start()
+              new CountUp('loanAmountMonthSum', _this.loanRatioInfo.loanAmountMonthSum, { decimalPlaces: 2, duration: 4 }).start()
+              let array = res.data.loanAmountData
+              // 近页面第一下存起来，和之前存的值对比一下
+              sessionStorage.setItem('historyInfo', JSON.stringify(res.data))
+              _this.chartInfo(array, 'history')
+            })
+          }
+        }
+      })
+    </script>
+  </body>
+
+</html>

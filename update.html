@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>天津银行贷款监控平台</title>
+    <!--设置是否为缩放模式 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <link rel="stylesheet" type="text/css" href="css/visual.css" />
+  </head>
+
+  <body class="ksh">
+    <div id="app">
+      <div class="head_top"><span>天津银行贷款监控平台</span></div>
+      <div class="visual" style="width: 80%; margin: 10px auto;">
+        <el-row>
+          <el-button class="fr" size="small" type="primary" @click="dialogVisible = true;form={}">新增</el-button>
+          <el-button size="small" type="primary" icon="el-icon-arrow-left">
+            <a href="index.html" style="color: #fff;">首页</a>
+          </el-button>
+        </el-row>
+        <el-table class="mt10" :data="tableData" style="width: 100%">
+          <el-table-column label="分行机构名称" prop="institutionName"> </el-table-column>
+          <el-table-column label="客户号" prop="customerSn"> </el-table-column>
+          <el-table-column label="客户名称" prop="customerName"> </el-table-column>
+          <el-table-column label="发放地" prop="grantPlace"> </el-table-column>
+          <el-table-column label="目的地" prop="destPlace"> </el-table-column>
+          <el-table-column label="贷款金额(万元)" min-width="120px" prop="loanAmount"> </el-table-column>
+          <el-table-column label="发放时间" prop="loanStartTime"> </el-table-column>
+          <el-table-column label="操作" min-width="110">
+            <template slot-scope="scope">
+              <el-button size="small" type="primary" @click="handleEdit(scope.$index, scope.row)">修改</el-button>
+              <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除 </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <!-- 分页 -->
+        <el-pagination
+          class="mt10 fr"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page.sync="pageNo"
+          :page-sizes="[5,10, 20, 50]"
+          :page-size.sync="pageSize"
+          layout="total, sizes, prev, pager, next"
+          :total="totalSize"
+        >
+        </el-pagination>
+      </div>
+
+      <!-- 新增 弹框 -->
+      <el-dialog title="新增" :visible.sync="dialogVisible" width="50%">
+        <el-form ref="form" :model="form" label-width="130px" :rules="rules">
+          <el-form-item label="机构名称" prop="institutionName">
+            <el-input v-model="form.institutionName"></el-input>
+          </el-form-item>
+          <el-form-item label="客户号" prop="customerSn">
+            <el-input v-model="form.customerSn"></el-input>
+          </el-form-item>
+          <el-form-item label="客户名称" prop="customerName">
+            <el-input v-model="form.customerName"></el-input>
+          </el-form-item>
+          <el-form-item label="贷款金额(万元)" prop="loanAmount">
+            <el-input v-model="form.loanAmount"></el-input>
+          </el-form-item>
+          <el-form-item label="发方地" prop="grantPlaceCode">
+            <el-select v-model="form.grantPlaceCode" placeholder="请选择发方地" style="width: 100%;">
+              <el-option :label="item.place" :value="item.placeCode" v-for="item in jsonSelect"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="目的地" prop="destPlaceCode">
+            <el-select v-model="form.destPlaceCode" placeholder="请选择目的地" style="width: 100%;">
+              <el-option :label="item.place" :value="item.placeCode" v-for="item in jsonSelect"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="发放时间" prop="loanStartTime">
+            <el-date-picker type="date" placeholder="选择日期" value-format="yyyy-MM-dd" v-model="form.loanStartTime" style="width: 100%;"> </el-date-picker>
+          </el-form-item>
+        </el-form>
+
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="onSubmit">确 定</el-button>
+        </span>
+      </el-dialog>
+
+      <!-- 编辑弹框 -->
+      <el-dialog title="编辑" :visible.sync="dialogUpdateForm" width="50%">
+        <el-form ref="updateForm" :model="updateForm" :rules="rules" label-width="130px">
+          <el-form-item label="机构名称" prop="institutionName">
+            <el-input v-model="updateForm.institutionName"></el-input>
+          </el-form-item>
+          <el-form-item label="客户号" prop="customerSn">
+            <el-input v-model="updateForm.customerSn"></el-input>
+          </el-form-item>
+          <el-form-item label="客户名称" prop="customerName">
+            <el-input v-model="updateForm.customerName"></el-input>
+          </el-form-item>
+          <el-form-item label="贷款金额(万元)"  prop="loanAmount">
+            <el-input v-model="updateForm.loanAmount"></el-input>
+          </el-form-item>
+          <el-form-item label="发方地" prop="grantPlaceCode">
+            <el-select v-model="updateForm.grantPlaceCode" placeholder="请选择发方地" style="width: 100%;">
+              <el-option :label="item.place" :value="item.placeCode" v-for="item in jsonSelect"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="目的地" prop="destPlaceCode">
+            <el-select v-model="updateForm.destPlaceCode" placeholder="请选择目的地" style="width: 100%;">
+              <el-option :label="item.place" :value="item.placeCode" v-for="item in jsonSelect"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="发放时间" prop="loanStartTime">
+            <el-date-picker type="date" placeholder="选择日期" value-format="yyyy-MM-dd" v-model="updateForm.loanStartTime" style="width: 100%;"> </el-date-picker>
+          </el-form-item>
+        </el-form>
+
+        <span slot="footer" class="dialog-footer">
+          <el-button @click=" dialogUpdateForm = false">取 消</el-button>
+          <el-button type="primary" @click="submitUpDate">确 定</el-button>
+        </span>
+      </el-dialog>
+
+      <div class="clear"></div>
+    </div>
+
+    <style>
+      .mt10 {
+        margin-top: 10px;
+      }
+
+      .fr {
+        float: right;
+      }
+      .el-pagination__total {
+        color: #fff !important;
+      }
+    </style>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+    <!-- 轮播swiper文件 -->
+    <script src="js/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.bootcss.com/babel-polyfill/7.8.7/polyfill.min.js"></script>
+    <script src="js/browser.min.js"></script>
+    <!--界面样式-->
+    <script src="js/chartMap.js"></script>
+    <script type="text/babel">
+      const beastUrl = 'http://47.105.205.65:8081'
+      var elgData = {
+        message: 'Hello World!',
+        tableData: [],
+        search: '',
+        pageNo: 1,
+        pageSize: 5,
+        totalSize: 0,
+        dialogVisible: false,
+        dialogUpdateForm: false,
+        form: {},
+        updateForm: {},
+        rules: {
+          institutionName: [{ required: true, message: '请输入参数', trigger: 'blur' }],
+          loanAmount: [{ required: true, message: '请输入参数', trigger: 'change' }],
+          grantPlaceCode: [{ required: true, message: '请输入参数', trigger: 'change' }],
+          customerSn: [{ required: true, message: '请输入参数', trigger: 'change' }],
+          loanStartTime: [{ required: true, message: '请选择时间', trigger: 'change' }],
+          customerName: [{ required: true, message: '请输入参数', trigger: 'change' }],
+          destPlaceCode: [{ required: true, message: '请输入参数', trigger: 'change' }]
+        }
+      }
+      new Vue({
+        el: '#app',
+        data: elgData,
+        created() {
+          this.getLists()
+        },
+        methods: {
+          // 修改
+          handleEdit(index, row) {
+            var _this = this
+            _this.dialogUpdateForm = true
+            _this.updateForm = JSON.parse(JSON.stringify(row))
+          },
+          submitUpDate() {
+            var _this = this
+            _this.$refs['updateForm'].validate(valid => {
+              if (!valid) return _this.$message.warning('请填写完整表单')
+              let datas = {}
+              datas = _this.updateForm
+              let grantPlace = jsonSelect.find(i => i.placeCode == _this.updateForm.grantPlaceCode)
+              let destPlace = jsonSelect.find(i => i.placeCode == _this.updateForm.destPlaceCode)
+              datas.grantPlace = grantPlace.place
+              datas.grantPlaceCoordinateX = grantPlace.placeCoordinateX
+              datas.grantPlaceCoordinateY = grantPlace.placeCoordinateY
+              datas.destPlace = destPlace.place
+              datas.destPlaceCoordinateX = destPlace.placeCoordinateX
+              datas.destPlaceCoordinateY = destPlace.placeCoordinateY
+              $.ajax({
+                type: 'post',
+                url: beastUrl + '/tjbank/loan/update',
+                data: datas,
+                success: function(response) {
+                  _this.$message.success('操作成功')
+                  _this.getLists()
+                  _this.dialogUpdateForm = false
+                }
+              })
+            })
+          },
+          // 新增
+          onSubmit() {
+            var _this = this
+            this.$refs['form'].validate(valid => {
+              if (!valid) return _this.$message.warning('请填写完整表单')
+              let datas = {}
+              datas = _this.form
+              let grantPlace = jsonSelect.find(i => i.placeCode == _this.form.grantPlaceCode)
+              let destPlace = jsonSelect.find(i => i.placeCode == _this.form.destPlaceCode)
+              datas.grantPlace = grantPlace.place
+              datas.grantPlaceCoordinateX = grantPlace.placeCoordinateX
+              datas.grantPlaceCoordinateY = grantPlace.placeCoordinateY
+              datas.destPlace = destPlace.place
+              datas.destPlaceCoordinateX = destPlace.placeCoordinateX
+              datas.destPlaceCoordinateY = destPlace.placeCoordinateY
+              $.ajax({
+                type: 'post',
+                url: beastUrl + '/tjbank/loan/add',
+                data: datas,
+                success: function(response) {
+                  _this.$message.success('新增成功')
+                  _this.getLists()
+                  _this.dialogVisible = false
+                }
+              })
+            })
+          },
+          //   删除
+          handleDelete(index, row) {
+            var _this = this
+            $.ajax({
+              type: 'post',
+              url: beastUrl + '/tjbank/loan/delete',
+              data: `id=${row.id}`,
+              success: function(res) {
+                _this.$message.success('删除成功')
+                _this.getLists()
+              }
+            })
+          },
+          handleSizeChange(val) {
+            this.getLists()
+          },
+          handleCurrentChange(val) {
+            this.getLists()
+          },
+          //   查看
+          getLists() {
+            var _this = this
+            let datas = {
+              pageNo: _this.pageNo,
+              pageSize: _this.pageSize
+            }
+            $.ajax({
+              type: 'get',
+              url: beastUrl + '/tjbank/loan/queryByPage',
+              data: datas,
+              // ContentType: 'application/json; charset=utf-8',
+              // dataType: 'json',
+              success: function(res) {
+                _this.tableData = res.data
+                _this.totalSize = res.totalSize
+              }
+            })
+          }
+        }
+      })
+    </script>
+  </body>
+</html>
